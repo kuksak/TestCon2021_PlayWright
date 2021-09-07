@@ -8,6 +8,6 @@ test('basic test', async ({ page }) => {
 
 test('duck duck go T 1', async ({ page }) => {
   await page.goto('https://duckduckgo.com/');
-  const title = page.locator('#logo_homepage_link');
-  await expect(title).toBeVisible;
+  const logo = page.locator('#logo_homepage_link');
+  await expect(logo).toBeVisible;
 });
