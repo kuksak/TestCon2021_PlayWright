@@ -1,19 +1,17 @@
 const { test, expect } = require('@playwright/test');
 
-test('basic test', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
-  const title = page.locator('.navbar__inner .navbar__title');
-  await expect(title).toHaveText('Playwright');
+test.describe('Duck duck smoke test suite ', () => {
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('https://duckduckgo.com/');
 });
 
 test('duck duck go T 1', async ({ page }) => {
-  await page.goto('https://duckduckgo.com/');
   const logo = page.locator('#logo_homepage_link');
   await expect(logo).toBeVisible;
 });
 
 test('T2: Check that search results contain expected text', async ({ page }) => {
-  await page.goto('https://duckduckgo.com/');
   const searchInputField = page.locator('#search_form_input_homepage');
   await searchInputField.fill('Test');
   await page.click('#search_button_homepage');
@@ -23,7 +21,6 @@ test('T2: Check that search results contain expected text', async ({ page }) => 
 });
 
 test('T3: Check that Cheat sheet for MSWord is displayed', async ({ page }) => {
-  await page.goto('https://duckduckgo.com/');
   const searchInputField = page.locator('#search_form_input_homepage');
   await searchInputField.fill('Microsoft word cheat sheet');
   await page.click('#search_button_homepage');
@@ -36,7 +33,6 @@ test('T3: Check that Cheat sheet for MSWord is displayed', async ({ page }) => {
 });
 
 test('T4: Check that URL shortening feature works', async ({ page }) => {
-  await page.goto('https://duckduckgo.com/');
   const searchInputField = page.locator('#search_form_input_homepage');
   await searchInputField.fill('shorten www.wikipedia.com');
   await page.click('#search_button_homepage');
@@ -47,4 +43,50 @@ test('T4: Check that URL shortening feature works', async ({ page }) => {
   
   const newPageURL = await page.url();
   expect(newPageURL).toBe("https://www.wikipedia.org/");
+});
+
+test('T5: Check that intitle functionality works', async ({ page }) => {
+  const searchInputField = page.locator('#search_form_input_homepage');
+  await searchInputField.fill('intitle:panda');
+  await page.click('#search_button_homepage');
+
+  const results = await page.evaluate(() => Array.from(document.querySelectorAll('div [data-nir="1"]'), element => element.textContent));
+        results.forEach(result => {
+            expect(result.toLowerCase()).toContain("panda");
+        });
+});
+
+test('T6: Check that automatic navigation to first result works', async ({ page }) => {
+  const searchInputField = page.locator('#search_form_input_homepage');
+  await searchInputField.fill('!w Lithuania');
+  await page.click('#search_button_homepage');
+  const newLoadedPage = await page.url();
+  await page.locator('h1#firstHeading:has-text("Lithuania")').toBeVisible;
+});
+
+
+const passwordLengthsPositive = ['8', '16', '64']
+passwordLengthsPositive.forEach(passwordLength => {
+  test(`T7: Check that generated passwords for length ${passwordLength} are of correct length`, async ({ page }) => {
+    const searchInputField = page.locator('#search_form_input_homepage');
+    await searchInputField.fill("password " + passwordLength);
+    await page.click('#search_button_homepage');
+
+    const generatedPassword = await page.textContent('h3.c-base__title');
+    expect(generatedPassword.length).toEqual(+passwordLength);
+  });
+});
+
+
+const passwordLengthsNegative = ['7', '65']
+passwordLengthsNegative.forEach(passwordLength => {
+  test(`T8: Check that passwords are not generated for lengths ${passwordLength}`, async ({ page }) => {
+    const searchInputField = page.locator('#search_form_input_homepage');
+    await searchInputField.fill("password " + passwordLength);
+    await page.click('#search_button_homepage');
+
+    const generatedPassword = await page.locator('h3.c-base__title >> visible=false');
+  });
+});
+
 });
