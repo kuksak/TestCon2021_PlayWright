@@ -49,7 +49,7 @@ test('T5: Check that intitle functionality works', async ({ page }) => {
   const searchInputField = page.locator('#search_form_input_homepage');
   await searchInputField.fill('intitle:panda');
   await page.click('#search_button_homepage');
-
+  await page.waitForNavigation();
   const results = await page.evaluate(() => Array.from(document.querySelectorAll('div [data-nir="1"]'), element => element.textContent));
         results.forEach(result => {
             expect(result.toLowerCase()).toContain("panda");
@@ -60,8 +60,10 @@ test('T6: Check that automatic navigation to first result works', async ({ page 
   const searchInputField = page.locator('#search_form_input_homepage');
   await searchInputField.fill('!w Lithuania');
   await page.click('#search_button_homepage');
-  const newLoadedPage = await page.url();
+  await page.waitForNavigation();
   await page.locator('h1#firstHeading:has-text("Lithuania")').toBeVisible;
+  const newLoadedPage = await page.url();
+  expect(newLoadedPage).toBe("https://en.wikipedia.org/wiki/Lithuania");
 });
 
 
@@ -77,7 +79,6 @@ passwordLengthsPositive.forEach(passwordLength => {
   });
 });
 
-
 const passwordLengthsNegative = ['7', '65']
 passwordLengthsNegative.forEach(passwordLength => {
   test(`T8: Check that passwords are not generated for lengths ${passwordLength}`, async ({ page }) => {
@@ -85,7 +86,8 @@ passwordLengthsNegative.forEach(passwordLength => {
     await searchInputField.fill("password " + passwordLength);
     await page.click('#search_button_homepage');
 
-    const generatedPassword = await page.locator('h3.c-base__title >> visible=false');
+    const isPasswordContentVisible = await page.isVisible(".c-base__title"); 
+    expect(isPasswordContentVisible).toBe(false)
   });
 });
 
