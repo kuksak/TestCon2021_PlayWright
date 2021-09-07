@@ -30,7 +30,7 @@ test('T3: Check that Cheat sheet for MSWord is displayed', async ({ page }) => {
   const firstResult = await page.textContent('.c-base__title');
   await expect(firstResult).toContain('Microsoft Word 2010');
   await page.isVisible('span.chomp--link__mr');
-  expect(await page.click('span.chomp--link__mr')).click;
+  expect(await page.click('span.chomp--link__mr'));
 
   expect(await page.isVisible('h6.cheatsheet__title:has-text("Formatting")'))
 });
